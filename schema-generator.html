@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schema Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .drop-zone {
+            background: white;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+        
+        .drop-zone:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+        
+        .drop-zone.dragover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+        
+        .drop-zone-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        
+        .drop-zone-text {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .drop-zone-hint {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .results.visible {
+            display: block;
+        }
+        
+        .output-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: translateY(-1px);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        
+        .copy-btn.copied {
+            background: #48bb78;
+        }
+        
+        pre {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        code {
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .reset-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            display: block;
+            margin: 20px auto;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+        
+        .reset-btn:hover {
+            background: transparent;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Schema Generator</h1>
+        <p class="subtitle">Drag and drop a <strong>CSV</strong> or <strong>.xlsx</strong> file below. The app infers a schema and gives you copy-ready JSON and Markdown summaries, plus example values.</p>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-zone-icon">📁</div>
+            <div class="drop-zone-text">Drag & Drop your file here</div>
+            <div class="drop-zone-hint">or click to browse (CSV or XLSX)</div>
+            <input type="file" id="fileInput" accept=".csv,.xlsx">
+        </div>
+        
+        <div class="results" id="results">
+            <div class="output-section">
+                <div class="section-header">
+                    <h2 class="section-title">JSON Schema</h2>
+                    <button class="copy-btn" onclick="copyToClipboard('jsonOutput', this)">Copy</button>
+                </div>
+                <pre><code id="jsonOutput"></code></pre>
+            </div>
+            
+            <div class="output-section">
+                <div class="section-header">
+                    <h2 class="section-title">Markdown Schema</h2>
+                    <button class="copy-btn" onclick="copyToClipboard('markdownOutput', this)">Copy</button>
+                </div>
+                <pre><code id="markdownOutput"></code></pre>
+            </div>
+            
+            <button class="reset-btn" onclick="reset()">Upload Another File</button>
+        </div>
+    </div>
+    
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const results = document.getElementById('results');
+        const errorDiv = document.getElementById('error');
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            handleFile(file);
+        });
+        
+        function handleFile(file) {
+            if (!file) return;
+            
+            errorDiv.classList.remove('visible');
+            
+            const extension = file.name.split('.').pop().toLowerCase();
+            
+            if (extension === 'csv') {
+                parseCSV(file);
+            } else if (extension === 'xlsx') {
+                parseXLSX(file);
+            } else {
+                showError('Please upload a CSV or XLSX file.');
+            }
+        }
+        
+        function parseCSV(file) {
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    if (results.data.length === 0) {
+                        showError('The CSV file appears to be empty.');
+                        return;
+                    }
+                    processData(results.data);
+                },
+                error: (error) => {
+                    showError('Error parsing CSV: ' + error.message);
+                }
+            });
+        }
+        
+        function parseXLSX(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    if (jsonData.length === 0) {
+                        showError('The XLSX file appears to be empty.');
+                        return;
+                    }
+                    
+                    processData(jsonData);
+                } catch (error) {
+                    showError('Error parsing XLSX: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function inferType(value) {
+            if (value === null || value === undefined || value === '') {
+                return 'string';
+            }
+            
+            if (typeof value === 'number') {
+                return Number.isInteger(value) ? 'integer' : 'number';
+            }
+            
+            if (typeof value === 'boolean') {
+                return 'boolean';
+            }
+            
+            const str = String(value).trim();
+            
+            if (!isNaN(str) && str !== '') {
+                return str.includes('.') ? 'number' : 'integer';
+            }
+            
+            const dateFormats = [
+                /^\d{4}-\d{2}-\d{2}$/,
+                /^\d{2}\/\d{2}\/\d{4}$/,
+                /^\d{4}\/\d{2}\/\d{2}$/
+            ];
+            
+            if (dateFormats.some(format => format.test(str))) {
+                return 'date';
+            }
+            
+            if (str.toLowerCase() === 'true' || str.toLowerCase() === 'false') {
+                return 'boolean';
+            }
+            
+            return 'string';
+        }
+        
+        function processData(data) {
+            const schema = {};
+            const headers = Object.keys(data[0]);
+            
+            headers.forEach(header => {
+                const values = data.map(row => row[header]).filter(v => v !== null && v !== undefined && v !== '');
+                const types = {};
+                
+                values.forEach(value => {
+                    const type = inferType(value);
+                    types[type] = (types[type] || 0) + 1;
+                });
+                
+                const dominantType = Object.keys(types).reduce((a, b) => types[a] > types[b] ? a : b, 'string');
+                
+                const examples = [...new Set(values)].slice(0, 3);
+                
+                schema[header] = {
+                    type: dominantType,
+                    examples: examples
+                };
+            });
+            
+            displayResults(schema);
+        }
+        
+        function displayResults(schema) {
+            const jsonOutput = document.getElementById('jsonOutput');
+            const markdownOutput = document.getElementById('markdownOutput');
+            
+            jsonOutput.textContent = JSON.stringify(schema, null, 2);
+            
+            let markdown = '# Schema\n\n';
+            markdown += '| Column | Type | Example Values |\n';
+            markdown += '|--------|------|----------------|\n';
+            
+            Object.entries(schema).forEach(([column, info]) => {
+                const examples = info.examples.map(e => `\`${e}\``).join(', ');
+                markdown += `| ${column} | ${info.type} | ${examples} |\n`;
+            });
+            
+            markdownOutput.textContent = markdown;
+            
+            dropZone.style.display = 'none';
+            results.classList.add('visible');
+        }
+        
+        function copyToClipboard(elementId, button) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
+        function reset() {
+            dropZone.style.display = 'block';
+            results.classList.remove('visible');
+            fileInput.value = '';
+            errorDiv.classList.remove('visible');
+        }
+        
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.add('visible');
+        }
+    </script>
+</body>
+</html>
