@@ -180,6 +180,95 @@
         .error.visible {
             display: block;
         }
+
+        .sheet-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .sheet-selector.visible {
+            display: block;
+        }
+
+        .sheet-selector h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .sheet-selector p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .sheet-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sheet-option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .sheet-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .sheet-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .sheet-option input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .sheet-option label {
+            cursor: pointer;
+            font-size: 1.1em;
+            color: #333;
+            flex: 1;
+        }
+
+        .proceed-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .proceed-btn:hover {
+            background: #764ba2;
+            transform: translateY(-1px);
+        }
+
+        .proceed-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
     </style>
 </head>
 <body>
@@ -188,14 +277,21 @@
         <p class="subtitle">Drag and drop a <strong>CSV</strong> or <strong>.xlsx</strong> file below. The app infers a schema and gives you copy-ready JSON and Markdown summaries, plus example values.</p>
         
         <div class="error" id="error"></div>
-        
+
         <div class="drop-zone" id="dropZone">
             <div class="drop-zone-icon">📁</div>
             <div class="drop-zone-text">Drag & Drop your file here</div>
             <div class="drop-zone-hint">or click to browse (CSV or XLSX)</div>
             <input type="file" id="fileInput" accept=".csv,.xlsx">
         </div>
-        
+
+        <div class="sheet-selector" id="sheetSelector">
+            <h2>📑 Select a Sheet</h2>
+            <p>This Excel file contains multiple sheets. Please select the one you'd like to analyze:</p>
+            <div class="sheet-list" id="sheetList"></div>
+            <button class="proceed-btn" id="proceedBtn" onclick="processSelectedSheet()">Proceed</button>
+        </div>
+
         <div class="results" id="results">
             <div class="output-section">
                 <div class="section-header">
@@ -222,6 +318,10 @@
         const fileInput = document.getElementById('fileInput');
         const results = document.getElementById('results');
         const errorDiv = document.getElementById('error');
+        const sheetSelector = document.getElementById('sheetSelector');
+        const sheetList = document.getElementById('sheetList');
+
+        let currentWorkbook = null;
         
         dropZone.addEventListener('click', () => fileInput.click());
         
@@ -285,20 +385,83 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                    
-                    if (jsonData.length === 0) {
-                        showError('The XLSX file appears to be empty.');
-                        return;
+                    currentWorkbook = workbook;
+
+                    // Check if there are multiple sheets
+                    if (workbook.SheetNames.length > 1) {
+                        showSheetSelector(workbook.SheetNames);
+                    } else {
+                        // Process the single sheet directly
+                        processSheet(workbook.SheetNames[0]);
                     }
-                    
-                    processData(jsonData);
                 } catch (error) {
                     showError('Error parsing XLSX: ' + error.message);
                 }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function showSheetSelector(sheetNames) {
+            sheetList.innerHTML = '';
+
+            sheetNames.forEach((name, index) => {
+                const option = document.createElement('div');
+                option.className = 'sheet-option';
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'sheet';
+                radio.value = name;
+                radio.id = `sheet-${index}`;
+                if (index === 0) radio.checked = true;
+
+                const label = document.createElement('label');
+                label.htmlFor = `sheet-${index}`;
+                label.textContent = name;
+
+                option.appendChild(radio);
+                option.appendChild(label);
+
+                option.addEventListener('click', () => {
+                    radio.checked = true;
+                    document.querySelectorAll('.sheet-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    option.classList.add('selected');
+                });
+
+                if (index === 0) option.classList.add('selected');
+
+                sheetList.appendChild(option);
+            });
+
+            dropZone.style.display = 'none';
+            sheetSelector.classList.add('visible');
+        }
+
+        function processSelectedSheet() {
+            const selectedRadio = document.querySelector('input[name="sheet"]:checked');
+            if (selectedRadio) {
+                processSheet(selectedRadio.value);
+            }
+        }
+
+        function processSheet(sheetName) {
+            if (!currentWorkbook) {
+                showError('No workbook loaded.');
+                return;
+            }
+
+            const sheet = currentWorkbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            if (jsonData.length === 0) {
+                showError(`The sheet "${sheetName}" appears to be empty.`);
+                return;
+            }
+
+            sheetSelector.classList.remove('visible');
+            processData(jsonData);
         }
         
         function inferType(value) {
@@ -400,8 +563,11 @@
         function reset() {
             dropZone.style.display = 'block';
             results.classList.remove('visible');
+            sheetSelector.classList.remove('visible');
             fileInput.value = '';
             errorDiv.classList.remove('visible');
+            currentWorkbook = null;
+            sheetList.innerHTML = '';
         }
         
         function showError(message) {
