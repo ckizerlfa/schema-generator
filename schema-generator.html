@@ -12,171 +12,212 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
         }
-        
+
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         h1 {
-            color: white;
+            color: #ffffff;
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
+            margin-bottom: 12px;
+            font-size: 2.75em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
         }
-        
+
+        .title-icon {
+            width: 48px;
+            height: 48px;
+        }
+
         .subtitle {
-            color: rgba(255, 255, 255, 0.9);
+            color: #cbd5e1;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+            margin-bottom: 48px;
+            font-size: 1.125em;
+            line-height: 1.6;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        
+
         .drop-zone {
-            background: white;
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 60px 40px;
+            background: #ffffff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 64px 40px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 30px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
         }
-        
+
         .drop-zone:hover {
-            border-color: #764ba2;
-            background: #f8f9ff;
-            transform: translateY(-2px);
+            border-color: #3b82f6;
+            background: #f8fafc;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        
+
         .drop-zone.dragover {
-            background: #f0f4ff;
-            border-color: #764ba2;
-            transform: scale(1.02);
+            background: #eff6ff;
+            border-color: #3b82f6;
+            border-width: 3px;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15), 0 4px 8px rgba(59, 130, 246, 0.1);
         }
-        
+
         .drop-zone-icon {
-            font-size: 4em;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
-        
+
+        .drop-zone-icon svg {
+            width: 64px;
+            height: 64px;
+            color: #64748b;
+        }
+
         .drop-zone-text {
-            font-size: 1.2em;
-            color: #333;
-            margin-bottom: 10px;
+            font-size: 1.25em;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
-        
+
         .drop-zone-hint {
-            color: #666;
-            font-size: 0.9em;
+            color: #64748b;
+            font-size: 0.95em;
         }
-        
+
         .results {
             display: none;
         }
-        
+
         .results.visible {
             display: block;
         }
-        
+
         .output-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
         }
-        
+
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f1f5f9;
         }
-        
+
         .section-title {
-            font-size: 1.3em;
-            color: #333;
-            font-weight: 600;
+            font-size: 1.375em;
+            color: #0f172a;
+            font-weight: 700;
+            letter-spacing: -0.25px;
         }
-        
+
         .copy-btn {
-            background: #667eea;
+            background: #3b82f6;
             color: white;
             border: none;
-            padding: 8px 20px;
+            padding: 10px 24px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.2s ease;
+            font-size: 0.925em;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
         }
-        
+
         .copy-btn:hover {
-            background: #764ba2;
+            background: #2563eb;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
             transform: translateY(-1px);
         }
-        
+
         .copy-btn:active {
             transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
         }
-        
+
         .copy-btn.copied {
-            background: #48bb78;
+            background: #10b981;
         }
-        
+
         pre {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 8px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
             overflow-x: auto;
             font-size: 0.9em;
-            line-height: 1.5;
+            line-height: 1.6;
+            border: 1px solid #e2e8f0;
         }
-        
+
         code {
-            font-family: 'Monaco', 'Courier New', monospace;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Courier New', monospace;
+            color: #334155;
         }
-        
+
         .reset-btn {
-            background: white;
-            color: #667eea;
-            border: 2px solid white;
-            padding: 12px 30px;
-            border-radius: 8px;
+            background: #ffffff;
+            color: #3b82f6;
+            border: 2px solid #ffffff;
+            padding: 14px 32px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 1em;
             display: block;
-            margin: 20px auto;
-            transition: all 0.2s ease;
+            margin: 32px auto;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
         }
-        
+
         .reset-btn:hover {
             background: transparent;
             color: white;
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
-        
+
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+
         input[type="file"] {
             display: none;
         }
-        
+
         .error {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 24px;
             display: none;
+            border-left: 4px solid #dc2626;
+            font-weight: 500;
         }
-        
+
         .error.visible {
             display: block;
         }
@@ -184,13 +225,22 @@
 </head>
 <body>
     <div class="container">
-        <h1>📊 Schema Generator</h1>
+        <h1>
+            <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Schema Generator
+        </h1>
         <p class="subtitle">Drag and drop a <strong>CSV</strong> or <strong>.xlsx</strong> file below. The app infers a schema and gives you copy-ready JSON and Markdown summaries, plus example values.</p>
-        
+
         <div class="error" id="error"></div>
-        
+
         <div class="drop-zone" id="dropZone">
-            <div class="drop-zone-icon">📁</div>
+            <div class="drop-zone-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+            </div>
             <div class="drop-zone-text">Drag & Drop your file here</div>
             <div class="drop-zone-hint">or click to browse (CSV or XLSX)</div>
             <input type="file" id="fileInput" accept=".csv,.xlsx">
